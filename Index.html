@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stefan Gets It Done - Handyman Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #0d9488 0%, #16a34a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-pattern {
+            background-color: #0f172a;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e293b' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .service-card {
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .calendar-day {
+            transition: all 0.2s;
+        }
+        .calendar-day:hover:not(.disabled):not(.blocked) {
+            background-color: #0d9488;
+            color: white;
+            transform: scale(1.1);
+        }
+        .calendar-day.selected {
+            background-color: #059669;
+            color: white;
+        }
+        .calendar-day.disabled {
+            color: #cbd5e1;
+            cursor: not-allowed;
+            background-color: #f1f5f9;
+        }
+        .calendar-day.blocked {
+            background-color: #ccfbf1;
+            color: #0f766e;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        .time-slot {
+            transition: all 0.2s;
+        }
+        .time-slot:hover:not(.disabled):not(.blocked) {
+            background-color: #0d9488;
+            color: white;
+            border-color: #0d9488;
+        }
+        .time-slot.selected {
+            background-color: #059669;
+            color: white;
+            border-color: #059669;
+        }
+        .time-slot.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f1f5f9;
+        }
+        .time-slot.blocked {
+            background-color: #ccfbf1;
+            color: #0f766e;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            border-color: #99f6e4;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.6s ease-out forwards;
+        }
+        .check-icon {
+            transition: transform 0.3s ease;
+        }
+        .service-card:hover .check-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+        .admin-panel {
+            display: none;
+        }
+        .admin-panel.active {
+            display: block;
+        }
+        .blocked-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #0d9488;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .mission-pattern {
+            background-image: radial-gradient(circle at 1px 1px, rgba(13, 148, 136, 0.15) 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-teal-600 to-green-600 rounded-lg flex items-center justify-center text-white text-xl shadow-lg">
+                        <i class="fas fa-hand-rock"></i>
+                    </div>
+                    <div>
+                        <span class="font-display font-bold text-2xl text-slate-900 block leading-none">Stefan</span>
+                        <span class="text-xs font-bold text-teal-600 tracking-wider uppercase">Gets It Done</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#mission" class="text-slate-600 hover:text-teal-600 font-medium transition">Mission</a>
+                    <a href="#services" class="text-slate-600 hover:text-teal-600 font-medium transition">Services</a>
+                    <a href="#pricing" class="text-slate-600 hover:text-teal-600 font-medium transition">Pricing</a>
+                    <a href="#booking" class="text-slate-600 hover:text-teal-600 font-medium transition">Book Now</a>
+                    <a href="#booking" class="px-6 py-3 bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-teal-500/30 transition transform hover:-translate-y-0.5">
+                        Get Started
+                    </a>
+                    <button onclick="toggleAdminLogin()" class="text-slate-400 hover:text-slate-600 text-sm" title="Admin Access">
+                        <i class="fas fa-lock"></i>
+                    </button>
+                </div>
+                <button class="md:hidden text-slate-600 text-2xl" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-200">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="#mission" class="block px-3 py-2 text-slate-600 hover:text-teal-600 font-medium">Mission</a>
+                <a href="#services" class="block px-3 py-2 text-slate-600 hover:text-teal-600 font-medium">Services</a>
+                <a href="#pricing" class="block px-3 py-2 text-slate-600 hover:text-teal-600 font-medium">Pricing</a>
+                <a href="#booking" class="block px-3 py-2 text-slate-600 hover:text-teal-600 font-medium">Book Now</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full">
+            <h3 class="font-display text-2xl font-bold text-slate-900 mb-4">Admin Access</h3>
+            <p class="text-slate-600 mb-4">Enter password to manage availability</p>
+            <input type="password" id="adminPassword" class="w-full px-4 py-3 rounded-xl border border-slate-300 mb-4 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none" placeholder="Password">
+            <div class="flex gap-3">
+                <button onclick="closeAdminLogin()" class="flex-1 py-3 border border-slate-300 rounded-xl font-semibold text-slate-700 hover:bg-slate-50 transition">Cancel</button>
+                <button onclick="checkAdminPassword()" class="flex-1 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition">Login</button>
+            </div>
+            <p id="loginError" class="text-red-500 text-sm mt-3 hidden">Incorrect password</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel (Hidden by default) -->
+    <div id="adminPanel" class="admin-panel fixed inset-0 bg-slate-900/95 z-40 overflow-y-auto">
+        <div class="max-w-4xl mx-auto p-8">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="font-display text-3xl font-bold text-white">Availability Manager</h2>
+                    <p class="text-slate-400">Block out times when you're busy with your other gig</p>
+                </div>
+                <button onclick="closeAdminPanel()" class="text-white hover:text-teal-400 text-2xl">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                    <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-calendar-times text-teal-400"></i>
+                        Block Date Range
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-slate-300 text-sm mb-1">Start Date</label>
+                            <input type="date" id="blockStartDate" class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 text-sm mb-1">End Date (optional)</label>
+                            <input type="date" id="blockEndDate" class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 text-sm mb-1">Reason (optional)</label>
+                            <input type="text" id="blockReason" class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:border-teal-500 outline-none" placeholder="e.g., Other gig, Vacation">
+                        </div>
+                        <button onclick="blockDateRange()" class="w-full py-3 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition">
+                            Block Dates
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                    <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-clock text-green-400"></i>
+                        Block Specific Times
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-slate-300 text-sm mb-1">Date</label>
+                            <input type="date" id="blockTimeDate" class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 text-sm mb-1">Block These Times</label>
+                            <div class="grid grid-cols-2 gap-2" id="adminTimeSlots">
+                            </div>
+                        </div>
+                        <button onclick="blockTimeSlots()" class="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
+                            Block Selected Times
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-white/5 rounded-2xl p-6 border border-white/10">
+                <h3 class="text-white font-bold text-lg mb-4">Currently Blocked</h3>
+                <div id="blockedList" class="space-y-2 max-h-64 overflow-y-auto">
+                    <p class="text-slate-400 text-sm">No blocked times set</p>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-4">
+                <button onclick="clearAllBlocked()" class="px-6 py-3 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/10 transition">
+                    Clear All Blocks
+                </button>
+                <button onclick="exportBlockedTimes()" class="px-6 py-3 border border-white/20 text-white rounded-lg hover:bg-white/10 transition">
+                    <i class="fas fa-download mr-2"></i>Export Schedule
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-pattern min-h-screen flex items-center pt-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-900/90 to-slate-800/90"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="animate-slide-in">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/20 text-teal-400 text-sm font-semibold mb-6 border border-teal-500/30">
+                        <i class="fas fa-star"></i>
+                        <span>Reliable & Affordable</span>
+                    </div>
+                    <h1 class="font-display text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
+                        Stefan Gets <br>
+                        <span class="gradient-text">It Done</span>
+                    </h1>
+                    <p class="text-xl text-slate-300 mb-8 leading-relaxed max-w-lg">
+                        Professional moving and hauling services. When you need an extra pair of hands or a full truck, I'm your guy.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#booking" class="px-8 py-4 bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-full font-bold text-lg hover:shadow-lg hover:shadow-teal-500/30 transition transform hover:-translate-y-1">
+                            Book Stefan <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        <a href="#mission" class="px-8 py-4 bg-white/10 text-white border border-white/20 rounded-full font-bold text-lg hover:bg-white/20 transition backdrop-blur-sm">
+                            Our Mission
+                        </a>
+                    </div>
+                    <div class="mt-12 flex items-center gap-6 text-slate-400">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-teal-500"></i>
+                            <span>Same Day Available</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-teal-500"></i>
+                            <span>Fair, Honest Pricing</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden lg:block relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-teal-600/20 to-green-600/20 rounded-full blur-3xl"></div>
+                    <div class="relative glass-effect rounded-3xl p-8 border border-white/10">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/5 rounded-2xl p-6 text-center">
+                                <i class="fas fa-truck-moving text-4xl text-teal-400 mb-3"></i>
+                                <h3 class="text-white font-semibold">Moving Help</h3>
+                                <p class="text-slate-400 text-sm mt-1">Furniture & boxes</p>
+                            </div>
+                            <div class="bg-white/5 rounded-2xl p-6 text-center">
+                                <i class="fas fa-boxes text-4xl text-green-400 mb-3"></i>
+                                <h3 class="text-white font-semibold">Hauling</h3>
+                                <p class="text-slate-400 text-sm mt-1">Junk removal</p>
+                            </div>
+                            <div class="bg-white/5 rounded-2xl p-6 text-center">
+                                <i class="fas fa-hand-holding-box text-4xl text-teal-400 mb-3"></i>
+                                <h3 class="text-white font-semibold">Labor Only</h3>
+                                <p class="text-slate-400 text-sm mt-1">Heavy lifting</p>
+                            </div>
+                            <div class="bg-white/5 rounded-2xl p-6 text-center">
+                                <i class="fas fa-home text-4xl text-green-400 mb-3"></i>
+                                <h3 class="text-white font-semibold">Delivery</h3>
+                                <p class="text-slate-400 text-sm mt-1">Item pickup</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Statement Section -->
+    <section id="mission" class="py-24 bg-white relative overflow-hidden mission-pattern">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 text-teal-700 text-sm font-semibold mb-6 border border-teal-100">
+                    <i class="fas fa-heart"></i>
+                    <span>Why I Do This</span>
+                </div>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-slate-900 mb-8">My Mission</h2>
+            </div>
+            
+            <div class="bg-gradient-to-br from-teal-50 to-green-50 rounded-3xl p-8 md:p-12 border border-teal-100 shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-teal-200/30 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-green-200/30 rounded-full -ml-32 -mb-32 blur-3xl"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex justify-center mb-8">
+                        <div class="w-20 h-20 bg-gradient-to-br from-teal-600 to-green-600 rounded-full flex items-center justify-center text-white text-3xl shadow-xl">
+                            <i class="fas fa-hand-holding-heart"></i>
+                        </div>
+                    </div>
+                    
+                    <blockquote class="text-center">
+                        <p class="text-2xl md:text-3xl font-medium text-slate-800 leading-relaxed mb-6 italic">
+                            I believe everyone deserves access to reliable, professional help without breaking the bank. My commitment is simple: show up on time, work hard, treat your belongings like my own, and charge a fair price for honest work. No hidden fees, no surprises, just dependable service you can trust.
+                        </p>
+                        <footer class="flex items-center justify-center gap-3 mt-8">
+                            <div class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 text-xl">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="text-left">
+                                <cite class="font-bold text-slate-900 not-italic block">Stefan Townsend</cite>
+                                <span class="text-teal-600 te
